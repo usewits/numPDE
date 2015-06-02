@@ -44,18 +44,18 @@ time_begin = time();
 for i = 0:M-1                       %Fill the matrix
 
     for n = 1:N-1
-        col = upos(i, n);               %Leapfrog
-        A(upos(i, n+1) , col) =  1;
-        A(upos(i, n-1) , col) = -1;
-        A(vpos(i, n)   , col) = -2*dt;
+        row = upos(i, n);               %Leapfrog
+        A(row, upos(i, n+1)) =  1;
+        A(row, upos(i, n-1)) = -1;
+        A(row, vpos(i, n)  ) = -2*dt;
         
-        col = vpos(i, n);               %SC1 (+leapfrog)
-        A(vpos(i, n+1) , col) =  1;
-        A(vpos(i, n-1) , col) = -1;
-        A(upos(i-2, n) , col) =    dt/(dx^3);
-        A(upos(i-1, n) , col) = -2*dt/(dx^3);
-        A(upos(i+1, n) , col) =  2*dt/(dx^3);
-        A(upos(i+2, n) , col) =   -dt/(dx^3);
+        row = vpos(i, n);               %SC1 (+leapfrog)
+        A(row, vpos(i, n+1)) =  1;
+        A(row, vpos(i, n-1)) = -1;
+        A(row, upos(i-2, n)) =    dt/(dx^3);
+        A(row, upos(i-1, n)) = -2*dt/(dx^3);
+        A(row, upos(i+1, n)) =  2*dt/(dx^3);
+        A(row, upos(i+2, n)) =   -dt/(dx^3);
     endfor
 
     
