@@ -1,8 +1,8 @@
-global N = 9;    %Number of points in time
-global M = 100;    %Number of points in space
+global N = 201;    %Number of points in time
+global M = 200;    %Number of points in space
 
 t_min = 0;
-t_max = 1;    %Bounds
+t_max = 10;    %Bounds
 x_min = -5;
 x_max = 8;
 
@@ -41,21 +41,27 @@ function result = u_initial(x)     %Initial value of u (model 2)
     result = exp(-3*(x-2)^2);
 endfunction
 
-function result = integrantv0(x)    %The integrant of v0(x). Was computed using mathematica.
-    result = (6*exp(-3*(-2+x)^2)*(23+6*(-4+x)*x))/(sqrt(pi)*sqrt(tmp-x));
-endfunction
-
-
 function result = v_initial(x)     %Initial value of v (model 2)
-    fun = @(x,c) (6*exp(-3*(-2+x)^2)*(23+6*(-4+x)*x))/(sqrt(pi)*sqrt(c-x));
     %TODO: replace this with a good value!
-    tmp = x+0.1;
-    result = quad(@(x)fun(x,tmp),0,x);
+    %fun = @(x,c) (6*exp(-3*(-2+x)^2)*(23+6*(-4+x)*x))/(sqrt(pi)*sqrt(c-x)); %The integrant of v0(x). Was computed using mathematica.
+    %result = quad(@(x)fun(x,tmp),0,x);
+    
+    %Using the approximation provided on the webpage
+    global M;
+    k = 2*(M+1);             %Higher k is more accurate
+    h = x/k;
+    som = 0;
+    for j=0:k-1
+        som += (     u_initial( x - (j-1) * h )
+                 - 2*u_initial( x -   j   * h )
+                 +   u_initial( x - (j+1) * h ) ) * ( sqrt(j+1) - sqrt(j) );
+    endfor
+    result = 2 / (sqrt(pi)*h^(3/2)) * som;
 endfunction
 
 function save_u_v(w)
-    global N
-    global M
+    global N;
+    global M;
     filenameu = "u.dat";
     filenamev = "v.dat";
     fidu = fopen (filenameu, "w");

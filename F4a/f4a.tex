@@ -186,6 +186,27 @@ We will place our constraints on the rows of $A$. For bookkeeping, we can assign
 \end{figure}
 
 \subsection*{Model 2}
+The initial conditions on $u$ and $v$ can be seen in figure \ref{fig:2init}. This time $v_0$ is set to $D^{3/2}_xu_0(x)$ the Caputo Fractional Derivative of order $3/2$ of $u_0$. The integral given (that gives $v_0$) cannot be integrated analytically, but can be approximated numerically; we used the method provided on the web page to do this.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.7\textwidth]{2init.png}
+\caption{The initial conditions for model 2}
+\label{fig:2init}
+\end{figure}
+
+We set our $u$ to zero at the boundaries, so $x_{-1} = x_{min} = x_{max} = x_{M}$. Our initial condition is $u(x, 0) = \sin(2\pi x)$ and $v(x, 0) = 0$. The final condition on $u$ and $v$ are not known analytically now. Let us take a look at the equations to find an estimate.
+$$u_{tt} = u_{xxx}$$
+And at $t=0$ we have $v = D^{3/2}_x u$, so $u = D^{3/2}_x v = (D^{3/2}_x)^2 u =$.
+%TODO: we have u_t = v, v = D^3/2 u, different splitting than @ model 1.. Use this in FD matrix?
+%TODO: Continue writing. STuff below must be adopted to fit model 2. Mention why final condition is 0; we expect some damped advection equation (can back this up with simulation with t until 10.)
+
+$$u(x,t) = \frac{1}{2} e^{-2 \pi ^{3/2} t} \left(\sin \left(2 \pi  \left(\sqrt{\pi } t+x\right)\right)-e^{4 \pi ^{3/2} t} \sin \left(2 \pi ^{3/2} t-2 \pi  x\right)\right)$$
+$$v(x,t) = \pi ^{3/2} e^{-2 \pi ^{3/2} t} \left(-\sin \left(2 \pi  \left(\sqrt{\pi } t+x\right)\right)+\cos \left(2 \pi  \left(\sqrt{\pi } t+x\right)\right)-e^{4 \pi ^{3/2} t} \left(\sin \left(2 \pi ^{3/2} t-2 \pi  x\right)+\cos \left(2 \pi ^{3/2} t-2 \pi  x\right)\right)\right)$$
+
+Let $w=(w^0, w^1, \dots w^N)^T$, where $w^n=(w_0^n,w_1^n,\dots,w_{M-1}^n)$ (we don't need $w_M^n$ since it is equal to $w_0^n$) and $w_i^n = (\uin,\vin)$. If $w$ is implemented as a ``flat'' array, we have $\uin$ on (1-based) index $n2M+\hat i 2+1$ and $\vin$ on (1-based) index $n2M+\hat i 2+2$, where $\hat i = (i+M)\mod M$ (periodic boundary conditions).% The correctness of these formulas can be seen as follows; $u_0^0$ has index 1. $u_{i+1}^n$ has an index that is 
+We will place our constraints on the rows of $A$. For bookkeeping, we can assign a row to every constraint using the indexing we used for $\uin$ and $\vin$; we will put constraint \eqref{eq:uin} on row ``$\uin$'' (also known as row $n2M+\hat i 2+1$) and constraint \eqref{eq:vin} on row ``$\vin$'' (also known as row $n2M+\hat i 2+2$). The constraints that follow from the boundary-conditions, \eqref{eq:ui0}, \eqref{eq:uiN}, \eqref{eq:vi0} and \eqref{eq:viN} are placed similarly, on rows ``$u_i^0$'', ``$u_i^N$'', ``$v_i^0$'' and ``$v_i^N$'' respectively. These constraints contain constants that have to be placed in $b$. Notice that there is exactly one constraint for every variable, so we are sure that our system is not underdetermined or overdetermined. Our implementation of the BV-method can be found in appendix A.
+
 
 
 
