@@ -149,7 +149,7 @@ $$\frac{\vinp - \vinm}{2\dt} \approx v_t = u_{xxx} \approx \frac{-\half{u_{i-2}^
 \vinp-\frac{2\dt}{(\dx)^3}\(-\half{u_{i-2}^n}+\uimn-\uipn+\half{u_{i+2}^n}\)-\vinm = 0
 \label{eq:vin}
 \end{equation}
-In this system we see $\uin$ and $\vin$ as our variables. Let $T = N\dt$, then $n\in\{0,1,\dots,N\}$. Similarly we choose $x_M=x_{max}$ and $x_0=x_{min}$, with $m \in \{0,1,\dots,M\}$. We will handle boundary conditions in the space direction separately for the different models.
+In this system we see $\uin$ and $\vin$ as our variables. Let $T = N\dt$, then $n\in\{0,1,\dots,N\}$. Similarly we choose $x_M=x_{max}$ and $x_0=x_{min}$, with $m \in \{0,1,\dots,M-1\}$. We will handle boundary conditions in the space direction and our choice of $\dx$ separately for the different models.
 Notice that our constraints are invalid if they contain non-existent variables such as $u_i^{N+1}$, $v_i^{N+1}$, $u_i^{-1}$ or $v_i^{-1}$. We do not use such invalid constraints, but add boundary conditions for $n=0$ and $n=N$ instead:
 \begin{equation}
 u_i^0 = u(x_i, 0)
@@ -168,15 +168,15 @@ v_i^N = v(x_i, T)
 \label{eq:viN}
 \end{equation}
 The functions $u_0$, $v_0$ (the initial conditions)  and $u_T$, $v_T$ (the final conditions) are different functions for model 1 and model 2.
-If all boundary conditions are chosen correctly, the number of constraints is exactly equal to the number of variables. We will write the system in the standard form, $A w = b$, where $A$ is a (known) matrix with all constraints, $b$ is a (known) vector with all the constants from the constraints, and $w$ the (unknown) vector that will contain our solution. We will handle the construction of $A$ and $b$ separately for model 1 and model 2.
+If all boundary conditions are chosen correctly, the number of constraints is exactly equal to the number of variables. We will write the system in the standard form, $A w = b$, where $A$ is a (known) matrix with all constraints, $b$ is a (known) vector with all the constants from the constraints, and $w$ the (unknown) vector that will contain our solution.
+
+Let $w=(w^0, w^1, \dots w^N)^T$, where $w^n=(w_0^n,w_1^n,\dots,w_{M-1}^n)$ (we use $w_M^n$ and $w_{-1}^n$ for our boundary conditions) and $w_i^n = (\uin,\vin)$. If $w$ is implemented as a ``flat'' array, we have $\uin$ on (1-based) index $n2M+\hat i 2+1$ and $\vin$ on (1-based) index $n2M+\hat i 2+2$, where $\hat i = (i+M)\mod M$ (periodic boundary conditions).% The correctness of these formulas can be seen as follows; $u_0^0$ has index 1. $u_{i+1}^n$ has an index that is 
+We will place our constraints on the rows of $A$. For bookkeeping, we can assign a row to every constraint using the indexing we used for $\uin$ and $\vin$; we will put constraint \eqref{eq:uin} on row ``$\uin$'' (also known as row $n2M+\hat i 2+1$) and constraint \eqref{eq:vin} on row ``$\vin$'' (also known as row $n2M+\hat i 2+2$). The constraints that follow from the boundary-conditions, \eqref{eq:ui0}, \eqref{eq:uiN}, \eqref{eq:vi0} and \eqref{eq:viN} are placed similarly, on rows ``$u_i^0$'', ``$u_i^N$'', ``$v_i^0$'' and ``$v_i^N$'' respectively. These constraints contain constants that have to be placed in $b$. Notice that there is exactly one constraint for every variable, so we are sure that our system is not underdetermined or overdetermined. Our implementation (in Octave) of the BV-method can be found in appendix A.
 
 \subsection*{Model 1}
-We have periodic boundary conditions, so $x_0 = x_{min} = x_{max} = x_M$. Our initial condition is $u(x, 0) = \sin(2\pi x)$ and $v(x, 0) = 0$. For the final condition on $u$ we use the exact solution given, and for $v$ we use its derivative; 
+For Model 1 we use $\dx = 1/M$, so $M\dx=1$. We have periodic boundary conditions, so $x_0 = x_{min} = x_{max} = x_M$, so $w_M^n = w_0^n$, which is why we do not need to use $u(1, t)$ and $v(1, t)$ explicitly (remember that $i \leq M-1$). Our initial condition is $u(x, 0) = \sin(2\pi x)$ and $v(x, 0) = 0$. For the final condition on $u$ we use the exact solution given, and for $v$ we use its derivative; 
 $$u(x,t) = \frac{1}{2} e^{-2 \pi ^{3/2} t} \left(\sin \left(2 \pi  \left(\sqrt{\pi } t+x\right)\right)-e^{4 \pi ^{3/2} t} \sin \left(2 \pi ^{3/2} t-2 \pi  x\right)\right)$$
 $$v(x,t) = \pi ^{3/2} e^{-2 \pi ^{3/2} t} \left(-\sin \left(2 \pi  \left(\sqrt{\pi } t+x\right)\right)+\cos \left(2 \pi  \left(\sqrt{\pi } t+x\right)\right)-e^{4 \pi ^{3/2} t} \left(\sin \left(2 \pi ^{3/2} t-2 \pi  x\right)+\cos \left(2 \pi ^{3/2} t-2 \pi  x\right)\right)\right)$$
-
-Let $w=(w^0, w^1, \dots w^N)^T$, where $w^n=(w_0^n,w_1^n,\dots,w_{M-1}^n)$ (we don't need $w_M^n$ since it is equal to $w_0^n$) and $w_i^n = (\uin,\vin)$. If $w$ is implemented as a ``flat'' array, we have $\uin$ on (1-based) index $n2M+\hat i 2+1$ and $\vin$ on (1-based) index $n2M+\hat i 2+2$, where $\hat i = (i+M)\mod M$ (periodic boundary conditions).% The correctness of these formulas can be seen as follows; $u_0^0$ has index 1. $u_{i+1}^n$ has an index that is 
-We will place our constraints on the rows of $A$. For bookkeeping, we can assign a row to every constraint using the indexing we used for $\uin$ and $\vin$; we will put constraint \eqref{eq:uin} on row ``$\uin$'' (also known as row $n2M+\hat i 2+1$) and constraint \eqref{eq:vin} on row ``$\vin$'' (also known as row $n2M+\hat i 2+2$). The constraints that follow from the boundary-conditions, \eqref{eq:ui0}, \eqref{eq:uiN}, \eqref{eq:vi0} and \eqref{eq:viN} are placed similarly, on rows ``$u_i^0$'', ``$u_i^N$'', ``$v_i^0$'' and ``$v_i^N$'' respectively. These constraints contain constants that have to be placed in $b$. Notice that there is exactly one constraint for every variable, so we are sure that our system is not underdetermined or overdetermined. Our implementation of the BV-method can be found in appendix A.
 
 \begin{figure}
 \centering
@@ -186,7 +186,7 @@ We will place our constraints on the rows of $A$. For bookkeeping, we can assign
 \end{figure}
 
 \subsection*{Model 2}
-The initial conditions on $u$ and $v$ can be seen in figure \ref{fig:2init}. This time $v_0$ is set to $D^{3/2}_xu_0(x)$ the Caputo Fractional Derivative of order $3/2$ of $u_0$. The integral given (that gives $v_0$) cannot be integrated analytically, but can be approximated numerically; we used the method provided on the web page to do this.
+This time $u(x, 0) = e^{-3(x-2)^2}$ and $v_0$ is set to $D^{3/2}_xu_0(x)$, the Caputo Fractional Derivative of order $3/2$ of $u_0$. The integral given ($\frac{1}{\Gamma(1/2)}\int_0^x{\frac{u''_0(\hat x)}{\sqrt{x-\hat x}}d\hat x}$) cannot be integrated analytically, but can be approximated numerically; we used the method provided on the web page to do this. Plots of the initial conditions on $u$ and $v$ can be seen in figure \ref{fig:2init}. The final condition on $u$ and $v$ are not known analytically now. Let us take a look at the equations to find an estimate.
 
 \begin{figure}
 \centering
@@ -194,21 +194,24 @@ The initial conditions on $u$ and $v$ can be seen in figure \ref{fig:2init}. Thi
 \caption{The initial conditions for model 2}
 \label{fig:2init}
 \end{figure}
-
-We set our $u$ to zero at the boundaries, so $x_{-1} = x_{min} = x_{max} = x_{M}$. Our initial condition is $u(x, 0) = \sin(2\pi x)$ and $v(x, 0) = 0$. The final condition on $u$ and $v$ are not known analytically now. Let us take a look at the equations to find an estimate.
+We do still have:
 $$u_{tt} = u_{xxx}$$
-And at $t=0$ we have $v = D^{3/2}_x u$, so $u = D^{3/2}_x v = (D^{3/2}_x)^2 u =$.
-%TODO: we have u_t = v, v = D^3/2 u, different splitting than @ model 1.. Use this in FD matrix?
-%TODO: Continue writing. STuff below must be adopted to fit model 2. Mention why final condition is 0; we expect some damped advection equation (can back this up with simulation with t until 10.)
+And at $t=0$ we have $u_t = v = D^{3/2}_x u$, and $v_t = u_{tt} = u_{xxx} = D^{3/2}_x(D^{3/2}_x u) = D^{3/2}_x v$;
+So as long $v = D^{3/2}_x u$ is satisfied we can write our ODEs as;
+$$
+\begin{cases}
+u_t = D^{3/2}_x u\\
+v_t = D^{3/2}_x v\\
+\end{cases}
+$$
+%Now we will show that the equation $v = D^{3/2}_x u$ at $t=0$ will hold for other values of $t$ as well.%TODO: does this actually hold?
+%$\frac{\partial}{\partial t}(v - D^{3/2}_x u) = v_t - D^{3/2}_x v = u_{xxx} - D^{3/2}_x v$
 
-$$u(x,t) = \frac{1}{2} e^{-2 \pi ^{3/2} t} \left(\sin \left(2 \pi  \left(\sqrt{\pi } t+x\right)\right)-e^{4 \pi ^{3/2} t} \sin \left(2 \pi ^{3/2} t-2 \pi  x\right)\right)$$
-$$v(x,t) = \pi ^{3/2} e^{-2 \pi ^{3/2} t} \left(-\sin \left(2 \pi  \left(\sqrt{\pi } t+x\right)\right)+\cos \left(2 \pi  \left(\sqrt{\pi } t+x\right)\right)-e^{4 \pi ^{3/2} t} \left(\sin \left(2 \pi ^{3/2} t-2 \pi  x\right)+\cos \left(2 \pi ^{3/2} t-2 \pi  x\right)\right)\right)$$
+Under these circumstances we expect $u$ and $v$ to behave ``independently'' according to the same ODE. As a result, we expect that they will keep satisfying these equations for $t\not = 0$ as well. The dynamics should be somewhere in between the advection ($u_t = u_{x}$) and heat ($u_t = u_{xx}$) equation. In the advection equation we expect the initial condition to move to the $-x$ direction with constant speed. In the heat equation we expect a lot of diffusion. Hence for our ``hybrid'' ODE we qualitatively expect some damped movement in the $-x$ direction. If the damping goes fast enough, the ``mass'' in the initial condition will be spread more evenly at $t = 1$. Hence choosing $v = u = 0$ at $t = 1$ seems reasonable (we will verify this choice with a numerical experiment). We expect that the (non-zero part of the) solution will stay away from $x=-5$ and $x=8$ since the initial value is significantly bigger than $0$ for $x\in [0, 6]$ only, leaving a size $5$ buffer to the left and a size $2$ buffer to the right. Hence we choose $v(-5, t) = v(8, t) = 0$. 
 
-Let $w=(w^0, w^1, \dots w^N)^T$, where $w^n=(w_0^n,w_1^n,\dots,w_{M-1}^n)$ (we don't need $w_M^n$ since it is equal to $w_0^n$) and $w_i^n = (\uin,\vin)$. If $w$ is implemented as a ``flat'' array, we have $\uin$ on (1-based) index $n2M+\hat i 2+1$ and $\vin$ on (1-based) index $n2M+\hat i 2+2$, where $\hat i = (i+M)\mod M$ (periodic boundary conditions).% The correctness of these formulas can be seen as follows; $u_0^0$ has index 1. $u_{i+1}^n$ has an index that is 
-We will place our constraints on the rows of $A$. For bookkeeping, we can assign a row to every constraint using the indexing we used for $\uin$ and $\vin$; we will put constraint \eqref{eq:uin} on row ``$\uin$'' (also known as row $n2M+\hat i 2+1$) and constraint \eqref{eq:vin} on row ``$\vin$'' (also known as row $n2M+\hat i 2+2$). The constraints that follow from the boundary-conditions, \eqref{eq:ui0}, \eqref{eq:uiN}, \eqref{eq:vi0} and \eqref{eq:viN} are placed similarly, on rows ``$u_i^0$'', ``$u_i^N$'', ``$v_i^0$'' and ``$v_i^N$'' respectively. These constraints contain constants that have to be placed in $b$. Notice that there is exactly one constraint for every variable, so we are sure that our system is not underdetermined or overdetermined. Our implementation of the BV-method can be found in appendix A.
+Now for our choice of $\dx$. We have $u = v = 0$ for $x = -5$ and $x = 8$, so we want $x_0 = -5 + \dx$ and $x_{M-1} = 8 - \dx$. So we set $x = -5 + (i+1)\dx$ with $\dx = \frac{13}{M+1}$.
 
-
-
+\clearpage
 
 \section*{Perform numerical experiments with the BV-technique applied to both models. Illustrate your report with a couple of plots and tables}
 \subsection*{Model 1}
@@ -223,6 +226,8 @@ We have solved a system with $N = 201$ and $M = 200$, this took about $30$ secon
 \caption{In this plot the yellow surface represents the exact solution of $u$, while the blue lines are the results from the BV method for Model 1 with $N=10$ and $M=100$}
 \label{fig:ucomp1}
 \end{figure}
+
+\clearpage
 
 \begin{figure}
 \centering
@@ -274,8 +279,28 @@ We have solved a system with $N = 201$ and $M = 200$, this took about $30$ secon
 \label{fig:verr1big}
 \end{figure}
 
+\clearpage
 
+\subsection*{Model 2}
+As mentioned before we chose our boundary values to be zero, because low values are to be expected after a lot of smoothing has occurred. To numerically verify that the given model will indeed be damped (near zero) at $t=1$, we first ran our simulation until $t=10$. The results can be seen in figure \ref{fig:uvdamp}. We noticed small oscillations between even and odd timesteps in both $u$ and $v$, although they are not as bad as we observed for even values of $N$. To get a rough estimate of the amplitude of these oscillations, we compared the linear average of two adjacent odd timesteps in $u$ with the even timestep in between them. The result can be seen in figure \ref{fig:oscsize}. Linear interpolation is not perfect, hence we can see that the curvature of $u$ some effect on this plot; see the small wave near $t=x=0$ (so $i \approx 100$ and $n = 0$), with amplitude about $0.01$. We can also see a big wave at $t=10$ with amplitude $0.05$, where $u$ appears to be nice and flat; this is an estimate of the size of the oscillations in $u$.
 
+\begin{figure}
+\centering
+\includegraphics[width=1.1\textwidth]{uvdamping.png}
+\caption{$u$ and $v$ for model 2 with $N=201$, $M=200$. Here $t\in[0,10]$, all other parameters are as specified in the exercise. Notice that we do indeed observe damping and a translation in the $-x$ direction for both $u$ and $v$.}
+\label{fig:uvdamp}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.5\textwidth]{oscsize.png}
+\caption{}
+\label{fig:oscsize}
+\end{figure}
+
+Even though both $u$ and $v$ are non-zero at $t=1$, choosing $u = v = 0$ at $T=1$ is no terrible choice. %TODO: improve sentence
+%TODO: results with T=1.
+%TODO: write about solutions if BTSC or FTCS would be used (from SC1?)
 \section*{Appendix A: BV-method implementation for model 1}
 \lstinputlisting{bvmodel1.m}
 
