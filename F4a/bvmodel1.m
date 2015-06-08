@@ -35,7 +35,10 @@ function result = u_exact(x, t)     %Exact solution of PDE (model 1)
 endfunction
 
 function result = v_exact(x, t)     %obtained using mathematica (derivative to t of u_exact)
-    result = exp(-2*pi^(3/2)*t)*pi^(3/2)*(cos(2*pi*(sqrt(pi)*t+x))-sin(2*pi*(sqrt(pi)*t+x))-exp(4*pi^(3/2)*t)*(cos(2*pi^(3/2)*t-2*pi*x)+sin(2*pi^(3/2)*t-2*pi*x)));
+    result = exp(-2*pi^(3/2)*t)*pi^(3/2)*(
+                    cos(2*pi*(sqrt(pi)*t+x)) - sin(2*pi*(sqrt(pi)*t+x))
+                    - exp(4*pi^(3/2)*t)*(cos(2*pi^(3/2)*t-2*pi*x)+sin(2*pi^(3/2)*t-2*pi*x))
+                );
 endfunction
 
 function save_u_v(w)

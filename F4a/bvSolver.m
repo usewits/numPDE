@@ -2,7 +2,7 @@ global N = 201;    %Number of points in time
 global M = 200;    %Number of points in space
 
 t_min = 0;
-t_max = 10;    %Bounds
+t_max = 1;    %Bounds
 x_min = -5;
 x_max = 8;
 
@@ -14,7 +14,7 @@ dx = (x_max-x_min) / (M+1);
 
 %w = zeros(1:2*M*(N+1),1); We want to know this; Aw=b
 b = zeros(2*M*(N+1),1);
-A = spalloc(2*M*(N+1), 2*M*(N+1), 9*M*(N-1)+3*M          +(M*N)+10); %use (y, x) or (row, col) (sparse!)
+A = spalloc(2*M*(N+1), 2*M*(N+1), 9*M*(N-1)+3*M          +5*(M*N)+10); %use (y, x) or (row, col) (sparse!)
 %A = zeros(2*M*(N+1),2*M*(N+1)); %use (y, x) or (row, col) (full!)
 
 function result = upos(i, n)                        %Easy to use versions of get_uv_pos_periodic
@@ -42,10 +42,6 @@ function result = u_initial(x)     %Initial value of u (model 2)
 endfunction
 
 function result = v_initial(x)     %Initial value of v (model 2)
-    %TODO: replace this with a good value!
-    %fun = @(x,c) (6*exp(-3*(-2+x)^2)*(23+6*(-4+x)*x))/(sqrt(pi)*sqrt(c-x)); %The integrant of v0(x). Was computed using mathematica.
-    %result = quad(@(x)fun(x,tmp),0,x);
-    
     %Using the approximation provided on the webpage
     global M;
     k = 2*(M+1);             %Higher k is more accurate
@@ -57,6 +53,14 @@ function result = v_initial(x)     %Initial value of v (model 2)
                  +   u_initial( x - (j+1) * h ) ) * ( sqrt(j+1) - sqrt(j) );
     endfor
     result = 2 / (sqrt(pi)*h^(3/2)) * som;
+endfunction
+
+function result = u_final(i)    %Fitted functions found in mathematica
+    result = 0.31314927132111237*exp(-3*(-2.486678585705514+0.025199383606127345*i)^2);
+endfunction
+
+function result = v_final(i)    %Fitted functions found in mathematica
+    result = -0.36948628705439973*exp(-0.0021796983589234373*(-93.06891803678627+i)^2)+0.40559736585200146*exp(-0.003584576255722463*(-78.67776776214579+i)^2);
 endfunction
 
 function save_u_v(w)
@@ -127,11 +131,11 @@ for i = 0:M-1                       %Fill the matrix
 
     pos = upos(i, N);                   %final condition u; we choose this 0
     A(pos, pos) = 1;
-    b(pos) = 0;
+    b(pos) = u_final(i);
 
     pos = vpos(i, N);                   %final condition v; we choose this 0
     A(pos, pos) = 1;
-    b(pos) = 0;
+    b(pos) = v_final(i);
 
 endfor
 

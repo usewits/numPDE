@@ -116,7 +116,7 @@
 \begin{document}
 \title{Exercise F4a}
 \author{Abe Wits (3629538)}
-\date{2015/04/15}%TODO the date
+\date{2015/06/05}
 
 \maketitle
 
@@ -171,7 +171,7 @@ The functions $u_0$, $v_0$ (the initial conditions)  and $u_T$, $v_T$ (the final
 If all boundary conditions are chosen correctly, the number of constraints is exactly equal to the number of variables. We will write the system in the standard form, $A w = b$, where $A$ is a (known) matrix with all constraints, $b$ is a (known) vector with all the constants from the constraints, and $w$ the (unknown) vector that will contain our solution.
 
 Let $w=(w^0, w^1, \dots w^N)^T$, where $w^n=(w_0^n,w_1^n,\dots,w_{M-1}^n)$ (we use $w_M^n$ and $w_{-1}^n$ for our boundary conditions) and $w_i^n = (\uin,\vin)$. If $w$ is implemented as a ``flat'' array, we have $\uin$ on (1-based) index $n2M+\hat i 2+1$ and $\vin$ on (1-based) index $n2M+\hat i 2+2$, where $\hat i = (i+M)\mod M$ (periodic boundary conditions).% The correctness of these formulas can be seen as follows; $u_0^0$ has index 1. $u_{i+1}^n$ has an index that is 
-We will place our constraints on the rows of $A$. For bookkeeping, we can assign a row to every constraint using the indexing we used for $\uin$ and $\vin$; we will put constraint \eqref{eq:uin} on row ``$\uin$'' (also known as row $n2M+\hat i 2+1$) and constraint \eqref{eq:vin} on row ``$\vin$'' (also known as row $n2M+\hat i 2+2$). The constraints that follow from the boundary-conditions, \eqref{eq:ui0}, \eqref{eq:uiN}, \eqref{eq:vi0} and \eqref{eq:viN} are placed similarly, on rows ``$u_i^0$'', ``$u_i^N$'', ``$v_i^0$'' and ``$v_i^N$'' respectively. These constraints contain constants that have to be placed in $b$. Notice that there is exactly one constraint for every variable, so we are sure that our system is not underdetermined or overdetermined. Our implementation (in Octave) of the BV-method can be found in appendix A.
+We will place our constraints on the rows of $A$. For bookkeeping, we can assign a row to every constraint using the indexing we used for $\uin$ and $\vin$; we will put constraint \eqref{eq:uin} on row ``$\uin$'' (also known as row $n2M+\hat i 2+1$) and constraint \eqref{eq:vin} on row ``$\vin$'' (also known as row $n2M+\hat i 2+2$). The constraints that follow from the boundary-conditions, \eqref{eq:ui0}, \eqref{eq:uiN}, \eqref{eq:vi0} and \eqref{eq:viN} are placed similarly, on rows ``$u_i^0$'', ``$u_i^N$'', ``$v_i^0$'' and ``$v_i^N$'' respectively. These constraints contain constants that have to be placed in $b$. Notice that there is exactly one constraint for every variable, so we are sure that our system is not underdetermined or overdetermined. Our implementation (in Octave) of the BV-method can be found in appendix A (model 1) and appendix B (model 2).
 
 \subsection*{Model 1}
 For Model 1 we use $\dx = 1/M$, so $M\dx=1$. We have periodic boundary conditions, so $x_0 = x_{min} = x_{max} = x_M$, so $w_M^n = w_0^n$, which is why we do not need to use $u(1, t)$ and $v(1, t)$ explicitly (remember that $i \leq M-1$). Our initial condition is $u(x, 0) = \sin(2\pi x)$ and $v(x, 0) = 0$. For the final condition on $u$ we use the exact solution given, and for $v$ we use its derivative; 
@@ -186,7 +186,7 @@ $$v(x,t) = \pi ^{3/2} e^{-2 \pi ^{3/2} t} \left(-\sin \left(2 \pi  \left(\sqrt{\
 \end{figure}
 
 \subsection*{Model 2}
-This time $u(x, 0) = e^{-3(x-2)^2}$ and $v_0$ is set to $D^{3/2}_xu_0(x)$, the Caputo Fractional Derivative of order $3/2$ of $u_0$. The integral given ($\frac{1}{\Gamma(1/2)}\int_0^x{\frac{u''_0(\hat x)}{\sqrt{x-\hat x}}d\hat x}$) cannot be integrated analytically, but can be approximated numerically; we used the method provided on the web page to do this. Plots of the initial conditions on $u$ and $v$ can be seen in figure \ref{fig:2init}. The final condition on $u$ and $v$ are not known analytically now. Let us take a look at the equations to find an estimate.
+This time $u(x, 0) = e^{-3(x-2)^2}$ and $v_0$ is set to $D^{3/2}_xu_0(x)$, the Caputo Fractional Derivative of order $3/2$ of $u_0$. The integral given ($\frac{1}{\Gamma(1/2)}\int_0^x{\frac{u''_0(\hat x)}{\sqrt{x-\hat x}}d\hat x}$) cannot be integrated analytically, but can be approximated numerically; we used the method provided on the web page to do this, where we chose $k = 2M$ (we did try $k = 10M$, but this yielded seemingly identical results, so $k = 2M$ seems to be a safe choice). Plots of the initial conditions on $u$ and $v$ can be seen in figure \ref{fig:2init}. The final condition on $u$ and $v$ are not known analytically now. Let us take a look at the equations to find an estimate.%Chose higher k?
 
 \begin{figure}
 \centering
@@ -216,8 +216,37 @@ Now for our choice of $\dx$. We have $u = v = 0$ for $x = -5$ and $x = 8$, so we
 \section*{Perform numerical experiments with the BV-technique applied to both models. Illustrate your report with a couple of plots and tables}
 \subsection*{Model 1}
 In figure \ref{fig:spy}, the position of non-zero elements in our matrix $A$ can be seen.
-We tested our method for $N = 10$ and $M = 100$. See figure \ref{fig:ucomp1} through \ref{fig:verr1} for a comparison of the exact solution and the values found with the BV-technique. Our implementation gives a reasonable estimation of $u$ and $v$, but a high accuracy is not achieved, especially for the high complexity of the BV-method. To obtain these results we had to solve a $2200\times2200$ ($2200 = 2*M*(N+1)$) linear system, which took about 30 seconds. During this calculation, Octave reported that our matrix $A$, was likely singular. We checked this by using $rank$, and found out that $A$ has $rank$ $2198$. After a while I realised that this is due to the characteristic of Leapfrog and our choice of $N$: $u$ on odd timesteps and $v$ on even timesteps are independent of $u$ on even timesteps and $v$ on odd timesteps. By choosing $N = 10$, our initial condition and final condition are both constraints on $u$ and $v$ in an even timestep, causing our matrix to be singular, and allowing invalid values for $u$ and $v$ on odd timesteps. After solving this problem by choosing $N$ odd, we have had far more accurate results and faster calculation;%TODO: explain properly
-We have solved a system with $N = 9$ and $M = 100$, this took about $0.3$ seconds. The absolute error in $u$ improved by approximately a factor 3. See figure \ref{fig:uerr1small} and \ref{fig:verr1small}.
+We tested our method for $N = 10$ and $M = 100$. See figure \ref{fig:ucomp1} through \ref{fig:verr1} for a comparison of the exact solution and the values found with the BV-technique. Our implementation gives a reasonable estimation of $u$ and $v$, but a high accuracy is not achieved, especially when we consider the computational intensity of the BV-method. Also notice that $u$ behaves differently on even and odd time steps (see figure \ref{fig:uerr1}). $u$ is relatively accurate on even time steps, but is split into two different modes on odd time steps, above (for odd $i$) and one below (for even $i$) the exact solution.
+Why exactly this is the case is not clear to me, but one can observe that with our choice of discretization we are actually solving two independent systems of equations; $u$ on odd time steps and $v$ on even time steps depend on each other and are independent of $u$ on even time steps and $u$ on odd time steps. Somehow one of these systems was solved nicely while the other developed the strange oscillations in $u$ we observed. We think this has something to do with the initial and final condition imposed on $u$ and $v$. For even values of $N$ we have the following situation:
+
+\begin{center}
+\begin{tabular}{c|cc}
+$N$ even & $u$ & $v$\\
+\hline
+0 & $A$ & $B$ \\
+1 & $B$ & $A$ \\
+2 & $A$ & $B$ \\
+$\vdots$ & $\vdots$ & $\vdots$ \\
+$N-1$ & $B$ & $A$ \\
+$N$ & $A$ & $B$ \\
+\end{tabular}
+\end{center}
+
+Here $A$ and $B$ are labels for the two independent systems. We have observed that system $B$ somehow develops oscillations in $u$. Perhaps the fact that we only directly impose our initial/final condition on $v$ in system $B$ has something to do with this behavior. We did observe that $A$ and $B$ behave more similarly when $N$ was chosen odd;
+
+\begin{center}
+\begin{tabular}{c|cc}
+$N$ odd & $u$ & $v$\\
+\hline
+0 & $A$ & $B$ \\
+1 & $B$ & $A$ \\
+$\vdots$ & $\vdots$ & $\vdots$ \\
+$N-1$ & $A$ & $B$ \\
+$N$ & $B$ & $A$ \\
+\end{tabular}
+\end{center}
+
+Now both systems have one direct constraint on $u$ and one direct constraint on $v$. We have solved a system with $N = 9$ and $M = 100$, this took about $0.3$ seconds. The absolute error in $u$ improved by approximately a factor 3. See figure \ref{fig:uerr1small} and \ref{fig:verr1small}.
 We have solved a system with $N = 201$ and $M = 200$, this took about $30$ seconds. See figure \ref{fig:uerr1big} and \ref{fig:verr1big} for the errors.
 
 \begin{figure}
@@ -232,7 +261,7 @@ We have solved a system with $N = 201$ and $M = 200$, this took about $30$ secon
 \begin{figure}
 \centering
 \includegraphics[width=0.6\textwidth]{errorUneat.png}
-\caption{The absolute error in $u$ (Model 1 with $N=10$ and $M=100$)\\Notice that the error is low in even timesteps, but has higher amplitude (about $10\%$ relative error) and is alternating rapidly on odd timesteps.}
+\caption{The absolute error in $u$ (Model 1 with $N=10$ and $M=100$)\\Notice that the error is low in even time steps, but has higher amplitude (about $10\%$ relative error) and is alternating rapidly on odd time steps.}
 \label{fig:uerr1}
 \end{figure}
 
@@ -282,7 +311,7 @@ We have solved a system with $N = 201$ and $M = 200$, this took about $30$ secon
 \clearpage
 
 \subsection*{Model 2}
-As mentioned before we chose our boundary values to be zero, because low values are to be expected after a lot of smoothing has occurred. To numerically verify that the given model will indeed be damped (near zero) at $t=1$, we first ran our simulation until $t=10$. The results can be seen in figure \ref{fig:uvdamp}. We noticed small oscillations between even and odd timesteps in both $u$ and $v$, although they are not as bad as we observed for even values of $N$. To get a rough estimate of the amplitude of these oscillations, we compared the linear average of two adjacent odd timesteps in $u$ with the even timestep in between them. The result can be seen in figure \ref{fig:oscsize}. Linear interpolation is not perfect, hence we can see that the curvature of $u$ some effect on this plot; see the small wave near $t=x=0$ (so $i \approx 100$ and $n = 0$), with amplitude about $0.01$. We can also see a big wave at $t=10$ with amplitude $0.05$, where $u$ appears to be nice and flat; this is an estimate of the size of the oscillations in $u$.
+As mentioned before we chose our boundary values ($u = v = 0$ at $x = -5$, $x = 8$ and $t = T$) to be zero, because low values are to be expected after a lot of smoothing has occurred. To numerically verify that the given model will indeed be near zero at $t=1$, we first ran our simulation until $t=10$. The results can be seen in figure \ref{fig:uvdamp}. We noticed small oscillations between even and odd time steps in both $u$ and $v$, although they are not as bad as we observed for even values of $N$. To get a rough estimate of the amplitude of these oscillations, we compared the linear average of two adjacent odd time steps in $u$ with the even time step in between them. The result can be seen in figure \ref{fig:oscsize}. Linear interpolation is not perfect, hence we can see that the curvature of $u$ some effect on this plot; see the small wave near $t=x=0$ (so $i \approx 100$ and $n = 0$), with amplitude about $0.01$. We can also see a big wave at $t=10$ with amplitude $0.05$, where $u$ appears to be nice and flat; this is an estimate of the size of the oscillations in $u$.
 
 \begin{figure}
 \centering
@@ -294,16 +323,50 @@ As mentioned before we chose our boundary values to be zero, because low values 
 \begin{figure}
 \centering
 \includegraphics[width=0.5\textwidth]{oscsize.png}
-\caption{}
+\caption{An estimate of the size of oscillations in $u$.}
 \label{fig:oscsize}
 \end{figure}
 
-Even though both $u$ and $v$ are non-zero at $t=1$, choosing $u = v = 0$ at $T=1$ is no terrible choice. %TODO: improve sentence
-%TODO: results with T=1.
-%TODO: write about solutions if BTSC or FTCS would be used (from SC1?)
+Both $u$ and $v$ are non-zero at $t=1$, but still have peaks with amplitude in the order of $0.2$. While choosing $u = v = 0$ at $t=1$ is no terrible choice, we might be able to do better. We hope that because we let the simulation run until $t=10$ our solution at $t=1$ is largely independent of the final condition. To test this theory, we choose different reasonable constant values for $u$ and $v$ at $t=10$ and compared the solution at $t=1$. See figures \ref{fig:uFinals} and \ref{fig:vFinals}. We see that the solution tends to damp out, so at $t=10$ we would find amplitudes between $0$ and $0.2$ reasonable. We fitted functions through the curves found with value $0$ at $x=-5$ and $x=8$, which we use as final conditions on $u$ and $v$ in our final simulation with $T=1$.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{uFinals.png}
+\caption{$u$ at $t=1$ for different $u(x, T) = v(x, T)$. We fitted a Gaussian function. Notice that this function lies within the region of reasonable solutions.}
+\label{fig:uFinals}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{vFinals.png}
+\caption{$v$ at $t=1$ for different $u(x, T) = v(x, T)$. We fitted the sum of two Gaussian functions. Notice that the result lies within the region of reasonable solutions.}
+\label{fig:vFinals}
+\end{figure}
+
+The result of this simulation can be seen in figure \ref{fig:uvResult}. Notice that it still contains some oscillations, we estimated the amplitude of these oscillations to be around $0.05$ (using the same method as before, see \ref{fig:errorFinal}). Despite these numerical errors, both $u$ and $v$ behave as we expected qualitatively.
+
+\begin{figure}
+\centering
+\includegraphics[width=1.0\textwidth]{uvResult.png}
+\caption{$u$ and $v$ found with the fitted final condition, using $N=201$ and $M=100$.}
+\label{fig:uvResult}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.5\textwidth]{errorFinal.png}
+\caption{Estimate of the amplitude of oscillations in $u$. Notice that this amplitude has size at most 0.05, which is a relative error in the order of $15\%$.}
+\label{fig:errorFinal}
+\end{figure}
+
+\section*{How would FTCS and BTCS perform when applied to these models?}
+Neither can be stable because of their stability region. See the practical part of SC1 for an explanation.
+
 \section*{Appendix A: BV-method implementation for model 1}
 \lstinputlisting{bvmodel1.m}
 
+\section*{Appendix B: BV-method implementation for model 2}
+\lstinputlisting{bvmodel2.m}
 
 
 \end{document}
